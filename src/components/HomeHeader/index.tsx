@@ -2,10 +2,15 @@ import { Power } from 'phosphor-react-native';
 import { Container, Greeting, Message, Name, Picture } from './styles';
 import { TouchableOpacity } from 'react-native';
 import theme from '../../theme';
-import { useUser } from '@realm/react';
+import { useUser, useApp } from '@realm/react';
 
 export function HomeHeader() {
   const user = useUser();
+  const app = useApp();
+
+  function handleLogout() {
+    app.currentUser?.logOut();
+  }
   return (
     <Container>
       <Picture
@@ -16,7 +21,7 @@ export function HomeHeader() {
         <Message>Olá</Message>
         <Name>{user.profile.name}</Name>
       </Greeting>
-      <TouchableOpacity>
+      <TouchableOpacity activeOpacity={0.7} onPress={handleLogout}>
         <Power size={32} color={theme.COLORS.GRAY_400} />
       </TouchableOpacity>
     </Container>
