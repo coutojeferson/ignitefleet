@@ -12,6 +12,10 @@ import {
   Alert,
 } from 'react-native';
 import { licensePlateValidade } from '../../utils/licensePlateValidate';
+import { useRealm } from '../../libs/realm';
+import { Historic } from '../../libs/realm/schemas/Historic';
+import { useUser } from '@realm/react';
+import { useNavigation } from '@react-navigation/native';
 
 const keyboardAvoindViewBehavior =
   Platform.OS === 'android' ? 'height' : 'position';
@@ -19,6 +23,11 @@ const keyboardAvoindViewBehavior =
 export function Departure() {
   const [description, setDescription] = useState('');
   const [licensePlate, setLicensePlate] = useState('');
+  const [isRegistering, setIsRegistering] = useState(false);
+
+  const { goBack } = useNavigation();
+  const realm = useRealm();
+  const user = useUser();
 
   const descriptionRef = useRef<TextInput>(null);
   const licensePlateRef = useRef<TextInput>(null);
@@ -39,12 +48,25 @@ export function Departure() {
           'Por favor, informe a finalidade da utilização do veículo.',
         );
       }
+      setIsRegistering(true);
+
+      realm.write(() => {
+        realm.create(
+          'Historic',
+          Historic.generate({
+            user_id: user!.id,
+            license_plate: licensePlate.toUpperCase(),
+            description,
+          }),
+        );
+      });
+
+      Alert.alert('Saída', 'Saída do veículo registrada com sucesso!');
+      goBack();
     } catch (error) {
       console.log(error);
-      return Alert.alert(
-        'Erro',
-        'Não foi possível realizar a saída do veículo.',
-      );
+      Alert.alert('Erro', 'Não foi possível realizar a saída do veículo.');
+      setIsRegistering(false);
     }
   }
   return (
@@ -74,7 +96,11 @@ export function Departure() {
               onChangeText={setDescription}
             />
 
-            <Button title="Registrar Saída" onPress={handleDepartureRegister} />
+            <Button
+              title="Registrar Saída"
+              onPress={handleDepartureRegister}
+              isLoading={isRegistering}
+            />
           </Content>
         </ScrollView>
       </KeyboardAvoidingView>
