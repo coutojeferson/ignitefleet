@@ -24,11 +24,26 @@ export function Departure() {
   const licensePlateRef = useRef<TextInput>(null);
 
   function handleDepartureRegister() {
-    if (!licensePlateValidade(licensePlate)) {
-      licensePlateRef.current?.focus();
+    try {
+      if (!licensePlateValidade(licensePlate)) {
+        licensePlateRef.current?.focus();
+        return Alert.alert(
+          'Placa inválida',
+          'A placa é inválida. Por favor, informe a placa correta do veículo.',
+        );
+      }
+      if (description.trim().length === 0) {
+        descriptionRef.current?.focus();
+        return Alert.alert(
+          'Finalidade',
+          'Por favor, informe a finalidade da utilização do veículo.',
+        );
+      }
+    } catch (error) {
+      console.log(error);
       return Alert.alert(
-        'Placa inválida',
-        'A placa é inválida. Por favor, informe a placa correta do veículo.',
+        'Erro',
+        'Não foi possível realizar a saída do veículo.',
       );
     }
   }
