@@ -63,13 +63,20 @@ export function Home() {
     }
   }
 
+  function handleHistoricDetails(id: string) {
+    navigate('arrival', { id });
+  }
+
   useEffect(() => {
     fetchVehicleInUse();
   }, []);
 
   useEffect(() => {
     realm.addListener('change', () => fetchVehicleInUse());
-    return () => realm.removeListener('change', fetchVehicleInUse);
+    return () => {
+      if (realm && !realm.isClosed)
+        realm.removeListener('change', fetchVehicleInUse);
+    };
   }, []);
 
   useEffect(() => {
@@ -89,7 +96,12 @@ export function Home() {
         <FlatList
           data={vehicleHistoric}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <HistoricCard data={item} />}
+          renderItem={({ item }) => (
+            <HistoricCard
+              data={item}
+              onPress={() => handleHistoricDetails(item.id)}
+            />
+          )}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 100 }}
           ListEmptyComponent={<Label>Nenhum registro de utilização.</Label>}
